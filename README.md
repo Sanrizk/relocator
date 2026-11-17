@@ -1,58 +1,200 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistem Pendukung Keputusan (SPK) Pemilihan Lokasi Cabang Ritel Baru
+### Integrasi Metode ROC (Rank Order Centroid) & SAW (Simple Additive Weighting)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi web Sistem Pendukung Keputusan (SPK) berbasis **Laravel** untuk membantu manajemen dan pengambil keputusan (Pimpinan/Direksi) dalam menentukan lokasi pembangunan cabang ritel baru yang paling optimal, objektif, dan transparan.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📌 Fitur Utama
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+1. **Role-Based Access Control (RBAC):**
+   - **Admin:** Memiliki akses penuh mengelola Kriteria, Alternatif Lokasi, Matriks Penilaian, dan melihat hasil SPK.
+   - **Pimpinan:** Mengakses dashboard ringkasan eksekutif, melihat hasil rekomendasi, serta mencetak laporan PDF.
+2. **Pembobotan Kriteria dengan ROC (Rank Order Centroid):**
+   - Admin hanya perlu menentukan peringkat prioritas kriteria ($1, 2, \dots, N$).
+   - Sistem secara otomatis menghitung bobot kriteria ($W_j$) secara matematis dan proporsional.
+3. **Perankingan dengan SAW (Simple Additive Weighting):**
+   - Menghitung normalisasi matriks ($R_{ij}$) untuk tipe kriteria *Benefit* dan *Cost*.
+   - Menghitung nilai preferensi akhir ($V_i$) secara transparan langkah demi langkah.
+4. **Matriks Penilaian Interaktif:**
+   - Input nilai skor mentah setiap alternatif secara langsung melalui antarmuka tabel dinamis.
+5. **Dashboard & Visualisasi Hasil:**
+   - Ringkasan top rekomendasi lokasi cabang ritel terbaik.
+6. **Cetak Laporan PDF:**
+   - Laporan resmi siap cetak / simpan ke PDF lengkap dengan tabel perankingan, bobot, normalisasi, serta lembar tanda tangan pimpinan.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 🧮 Rumus & Metode yang Digunakan
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 1. Metode ROC (Rank Order Centroid)
+$$W_j = \frac{1}{N} \sum_{k=j}^{N} \frac{1}{k}$$
+*Di mana:*
+- $N$ = Total jumlah kriteria.
+- $j$ = Nomor urutan peringkat kriteria ($1 \le j \le N$).
+- Kriteria peringkat 1 memiliki bobot paling besar, dan $\sum W_j = 1$.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 2. Metode SAW (Simple Additive Weighting)
+- **Normalisasi Matriks ($R_{ij}$):**
+  - Kriteria **Benefit**:
+    $$R_{ij} = \frac{X_{ij}}{\max(X_j)}$$
+  - Kriteria **Cost**:
+    $$R_{ij} = \frac{\min(X_j)}{X_{ij}}$$
+- **Nilai Preferensi ($V_i$):**
+  $$V_i = \sum_{j=1}^{n} W_j \cdot R_{ij}$$
+- **Perankingan:** Alternatif dengan nilai $V_i$ tertinggi merupakan rekomendasi cabang ritel terbaik.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+---
 
-## Agentic Development
+## 🛠️ Kebutuhan Sistem (Prerequisites)
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+- **PHP:** Versi 8.2 atau lebih baru (disarankan ekstensi `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`).
+- **Composer:** Versi 2.x
+- **Database:** MySQL 5.7+ / MariaDB 10.3+ (atau SQLite).
+- **Web Browser Modern** (Chrome, Firefox, Edge, Safari).
 
+---
+
+## 🚀 Panduan Instalasi (Step-by-Step)
+
+### 1. Clone Repositori
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/username/relocator.git
+cd relocator
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Install Dependensi PHP
+```bash
+composer install
+```
 
-## Contributing
+### 3. Konfigurasi Environment (`.env`)
+Salin file konfigurasi contoh:
+```bash
+cp .env.example .env
+```
+Buka file `.env` dan sesuaikan pengaturan database Anda:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=db_spk_ritel
+DB_USERNAME=root
+DB_PASSWORD=
+```
+> **Catatan:** Pastikan database `db_spk_ritel` telah dibuat di MySQL/phpMyAdmin Anda:
+> ```sql
+> CREATE DATABASE db_spk_ritel;
+> ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 4. Generate Application Key
+```bash
+php artisan key:generate
+```
 
-## Code of Conduct
+### 5. Jalankan Migrasi & Database Seeder
+Perintah ini akan membuat semua tabel dan mengisi data awal (akun pengguna, kriteria contoh, alternatif ritel, dan penilaian sampel):
+```bash
+php artisan migrate --seed
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 6. Jalankan Local Server
+```bash
+php artisan serve
+```
+Aplikasi sekarang dapat diakses melalui browser di:
+👉 **`http://127.0.0.1:8000`**
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 🔑 Akun Default (Demo)
 
-## License
+Gunakan kredensial berikut untuk masuk ke sistem:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+| Role | Email | Password | Hak Akses |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin@ritel.com` | `password` | CRUD Kriteria, Alternatif, Matriks Nilai, Hasil SPK, Cetak PDF |
+| **Pimpinan** | `pimpinan@ritel.com` | `password` | Dashboard, Hasil Rekomendasi SAW, Cetak PDF |
+
+---
+
+## 📖 Alur & Tata Cara Penggunaan
+
+### 1. Login
+Masuk melalui halaman login menggunakan akun **Admin** atau **Pimpinan**.
+
+### 2. Kelola Kriteria (Hanya Admin)
+- Buka menu **Kriteria (ROC)**.
+- Tambah atau sesuaikan kriteria penilaian:
+  - **Nama Kriteria**: misal *Kepadatan Penduduk*, *Biaya Sewa Lahan*, *Aksesibilitas*.
+  - **Jenis / Atribut**: 
+    - `Benefit` jika semakin tinggi nilai semakin baik.
+    - `Cost` jika semakin rendah nilai semakin baik (contoh: biaya sewa).
+  - **Peringkat**: Tentukan urutan prioritas (Peringkat 1 adalah kriteria paling penting).
+- Klik tombol **"Hitung Ulang Bobot ROC"** untuk memperbarui bobot otomatis sesuai formula matematis ROC.
+
+### 3. Kelola Alternatif Lokasi (Hanya Admin)
+- Buka menu **Alternatif Lokasi**.
+- Daftarkan calon lokasi cabang ritel baru beserta alamat lengkapnya.
+
+### 4. Isi Matriks Penilaian (Hanya Admin)
+- Buka menu **Matriks Penilaian**.
+- Masukkan nilai skor mentah dari masing-masing alternatif lokasi untuk setiap kriteria.
+- Klik **"Simpan Matriks Penilaian"**.
+
+### 5. Lihat Proses & Hasil Keputusan (Admin & Pimpinan)
+- Buka menu **Hasil & Rekomendasi (SAW)**.
+- Sistem akan menampilkan:
+  1. **Tabel Rekomendasi Utama & Perankingan:** Peringkat 1 dengan nilai preferensi ($V_i$) tertinggi ditandai sebagai rekomendasi utama.
+  2. **Tabel Bobot Kriteria ROC ($W_j$)**.
+  3. **Tabel Matriks Normalisasi ($R_{ij}$)**.
+  4. **Tabel Matriks Terbobot ($W_j \times R_{ij}$)**.
+
+### 6. Cetak Laporan PDF
+- Klik tombol **"Cetak / Export PDF"** di halaman hasil SPK.
+- Gunakan fitur print browser (`Ctrl + P` atau tombol yang disediakan) untuk mencetak langsung atau memilih opsi *Save as PDF*.
+
+---
+
+## 🧪 Menjalankan Pengujian Otomatis (Tests)
+
+Proyek ini telah dilengkapi dengan Unit & Feature Test (menggunakan Pest PHP):
+```bash
+php artisan test
+```
+
+---
+
+## 📁 Struktur Direktori Penting
+
+```text
+app/
+├── Http/
+│   ├── Controllers/
+│   │   ├── AlternatifController.php   # Manajemen Alternatif
+│   │   ├── AuthController.php         # Autentikasi Login/Logout
+│   │   ├── DashboardController.php    # Ringkasan Eksekutif
+│   │   ├── KriteriaController.php     # Manajemen Kriteria & ROC
+│   │   ├── PenilaianController.php    # Matriks Input Penilaian
+│   │   └── SpkController.php          # Output Perhitungan SAW & Cetak PDF
+│   └── Middleware/
+│       └── RoleMiddleware.php         # Penjaga Hak Akses RBAC
+├── Models/
+│   ├── Alternatif.php
+│   ├── HasilSpk.php
+│   ├── Kriteria.php
+│   ├── Penilaian.php
+│   └── User.php
+└── Services/
+    └── SpkService.php                 # Service Inti Logika Algoritma ROC & SAW
+database/
+├── migrations/                        # Skema tabel database
+└── seeders/DatabaseSeeder.php         # Data inisialisasi akun & sampel data
+resources/views/                       # Tampilan Blade & Tailwind CSS UI
+tests/Feature/SpkCalculationTest.php   # Pengujian matematis ROC & SAW
+```
+
+---
+
+## 📄 Lisensi
+Proyek ini bersifat *open-source* di bawah lisensi [MIT License](LICENSE).
